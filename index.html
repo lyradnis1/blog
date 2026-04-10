@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Learning Diary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Linux+Libertine+O:ital,wght@0,400;0,600;1,400&family=Linux+Biolinum+O&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;
+  --surface:#f8f9fa;
+  --border:#a2a9b1;
+  --border-light:#eaecf0;
+  --text:#202122;
+  --muted:#54595d;
+  --link:#3366cc;
+  --link-v:#6b4ba1;
+  --serif:'Linux Libertine O',Georgia,'Times New Roman',serif;
+  --sans:'Linux Biolinum O','Helvetica Neue',Arial,sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--serif);font-size:0.9375rem;line-height:1.65}
+
+/* TOP BAR */
+#topbar{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:0.6rem;
+  padding:0 1rem;height:50px;
+  position:sticky;top:0;z-index:200;
+}
+#menu-btn{
+  display:none;background:none;border:none;cursor:pointer;
+  font-size:1.25rem;color:var(--text);line-height:1;padding:4px 6px;
+  flex-shrink:0;
+}
+.site-logo{
+  display:flex;flex-direction:column;cursor:pointer;flex-shrink:0;
+  text-decoration:none;
+}
+.site-logo .name{
+  font-family:var(--serif);font-size:1.25rem;font-weight:600;
+  color:var(--text);line-height:1;
+}
+.site-logo .tagline{
+  font-family:var(--sans);font-size:0.65rem;
+  color:var(--muted);line-height:1.2;
+}
+#search-wrap{flex:1;max-width:380px;position:relative;margin-left:0.5rem}
+#search-wrap svg{
+  position:absolute;left:8px;top:50%;transform:translateY(-50%);
+  width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2;pointer-events:none;
+}
+#search-input{
+  width:100%;padding:5px 8px 5px 28px;
+  border:1px solid var(--border);border-radius:2px;
+  font-family:var(--sans);font-size:0.8rem;
+  background:#fff;color:var(--text);
+}
+#search-input:focus{outline:1px solid var(--link);border-color:var(--link)}
+
+/* LAYOUT */
+#layout{
+  display:grid;
+  grid-template-columns:200px 1fr;
+  max-width:1180px;
+  margin:0 auto;
+  min-height:calc(100vh - 50px);
+}
+
+/* SIDEBAR */
+#sidebar{
+  border-right:1px solid var(--border-light);
+  background:#fff;
+  position:sticky;top:50px;
+  height:calc(100vh - 50px);
+  overflow-y:auto;
+  padding-bottom:2rem;
+}
+.sb-sec h3{
+  font-family:var(--sans);font-size:0.67rem;
+  letter-spacing:0.09em;text-transform:uppercase;
+  color:var(--muted);padding:0.6rem 0.9rem 0.2rem;
+  border-top:1px solid var(--border-light);
+}
+.sb-sec:first-child h3{border-top:none}
+.sb-sec ul{list-style:none}
+.sb-sec ul li button,
+.sb-sec ul li a{
+  display:block;width:100%;text-align:left;
+  padding:0.28rem 0.9rem 0.28rem 1.1rem;
+  font-family:var(--sans);font-size:0.79rem;
+  color:var(--link);text-decoration:none;
+  background:none;border:none;cursor:pointer;line-height:1.45;
+}
+.sb-sec ul li button:hover,
+.sb-sec ul li a:hover{background:var(--surface);text-decoration:underline}
+.sb-sec ul li button.active{
+  background:#eaf3fb;font-weight:600;color:var(--text);
+  border-left:3px solid var(--link);
+}
+.post-date{display:block;font-size:0.67rem;color:var(--muted);font-style:italic}
+
+/* CONTENT */
+#content{padding:1.5rem 2rem 3rem;min-width:0}
+
+/* WELCOME */
+#welcome h1{
+  font-family:var(--serif);font-size:2rem;font-weight:400;
+  border-bottom:1px solid var(--border);padding-bottom:0.35rem;margin-bottom:1rem;
+}
+#welcome .intro{font-size:0.92rem;margin-bottom:1.25rem}
+.card-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:0.85rem;margin-top:0.75rem;
+}
+.entry-card{
+  border:1px solid var(--border-light);padding:0.8rem 0.9rem;
+  background:var(--surface);cursor:pointer;transition:border-color .15s;
+}
+.entry-card:hover{border-color:var(--link)}
+.entry-card h3{
+  font-family:var(--sans);font-size:0.83rem;font-weight:600;
+  color:var(--link);margin-bottom:0.2rem;
+}
+.entry-card .cmeta{font-family:var(--sans);font-size:0.7rem;color:var(--muted)}
+.card-tag{
+  display:inline-block;margin-top:0.35rem;
+  font-family:var(--sans);font-size:0.63rem;
+  padding:1px 5px;border:1px solid var(--border);color:var(--muted);
+}
+
+/* ARTICLE */
+#article{display:none}
+.art-title-line{
+  border-bottom:1px solid var(--border);
+  padding-bottom:0.3rem;margin-bottom:0.2rem;
+}
+.art-title-line h1{
+  font-family:var(--serif);font-size:1.9rem;font-weight:400;line-height:1.2;
+}
+.art-tagline{
+  font-family:var(--sans);font-size:0.8rem;color:var(--muted);
+  font-style:italic;margin-bottom:0.85rem;
+}
+.art-metabar{
+  font-family:var(--sans);font-size:0.73rem;color:var(--muted);
+  border-bottom:1px solid var(--border-light);
+  padding-bottom:0.45rem;margin-bottom:1.1rem;
+  display:flex;gap:0.9rem;flex-wrap:wrap;align-items:center;
+}
+.tag-pill{
+  display:inline-block;padding:1px 7px;
+  border:1px solid;font-size:0.68rem;font-family:var(--sans);
+}
+
+/* Two-col layout inside article */
+.art-grid{
+  display:grid;
+  grid-template-columns:1fr 210px;
+  gap:1.4rem;align-items:start;
+}
+
+/* TOC */
+.toc-box{
+  border:1px solid var(--border);background:var(--surface);
+  padding:0.7rem 0.9rem;font-family:var(--sans);font-size:0.78rem;
+  position:sticky;top:66px;
+}
+.toc-head{
+  font-weight:600;font-size:0.8rem;
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:0.45rem;
+}
+.toc-head button{
+  background:none;border:none;cursor:pointer;
+  font-size:0.7rem;color:var(--link);font-family:var(--sans);
+}
+.toc-box ol{padding-left:1rem;line-height:1.75}
+.toc-box ol li a{color:var(--link);text-decoration:none}
+.toc-box ol li a:hover{text-decoration:underline}
+.toc-box ol ol{font-size:0.73rem;padding-left:0.9rem}
+
+/* Body typography */
+#art-body h2{
+  font-family:var(--serif);font-weight:400;font-size:1.3rem;
+  border-bottom:1px solid var(--border-light);
+  padding-bottom:0.15rem;margin:1.5rem 0 0.55rem;
+}
+#art-body h3{
+  font-family:var(--serif);font-weight:400;font-size:1.08rem;
+  margin:1.2rem 0 0.35rem;
+}
+#art-body h4{
+  font-family:var(--sans);font-weight:700;font-size:0.86rem;
+  margin:1rem 0 0.25rem;
+}
+#art-body p{margin-bottom:0.7rem}
+#art-body a{color:var(--link)}
+#art-body a:visited{color:var(--link-v)}
+#art-body ul,#art-body ol{padding-left:1.7rem;margin-bottom:0.7rem}
+#art-body li{margin-bottom:0.22rem}
+#art-body code{
+  font-family:'Courier New',monospace;font-size:0.8em;
+  background:#f4f4f4;border:1px solid #ddd;padding:1px 4px;
+}
+#art-body pre{
+  background:#f4f4f4;border:1px solid var(--border);
+  border-left:3px solid var(--border);
+  padding:0.9rem 1rem;overflow-x:auto;margin:0.9rem 0;
+  font-size:0.79rem;line-height:1.5;
+}
+#art-body pre code{background:none;border:none;padding:0;font-size:inherit}
+#art-body blockquote{
+  border-left:3px solid var(--border);
+  padding:0.35rem 1rem;margin:0.9rem 0;
+  color:var(--muted);font-style:italic;
+}
+#art-body hr{border:none;border-top:1px solid var(--border-light);margin:1.4rem 0}
+#art-body table{
+  border-collapse:collapse;margin:0.9rem 0;
+  font-family:var(--sans);font-size:0.8rem;width:100%;
+}
+#art-body th{
+  background:var(--surface);border:1px solid var(--border);
+  padding:4px 9px;text-align:left;font-weight:700;
+}
+#art-body td{border:1px solid var(--border);padding:4px 9px}
+#art-body tr:nth-child(even) td{background:var(--surface)}
+
+/* FOOTER */
+footer{
+  border-top:1px solid var(--border-light);background:var(--surface);
+  padding:0.9rem 2rem;font-family:var(--sans);font-size:0.74rem;
+  color:var(--muted);text-align:center;
+}
+footer a{color:var(--link)}
+
+/* MOBILE */
+@media(max-width:760px){
+  #menu-btn{display:block}
+  #layout{grid-template-columns:1fr}
+  #sidebar{
+    display:none;position:fixed;
+    top:50px;left:0;right:0;bottom:0;
+    height:auto;z-index:150;
+    border-right:none;
+    box-shadow:0 4px 16px rgba(0,0,0,.18);
+    overflow-y:auto;
+  }
+  #sidebar.open{display:block}
+  #content{padding:1rem 1rem 2.5rem}
+  .art-grid{grid-template-columns:1fr}
+  .toc-box{position:static;margin-bottom:1.25rem}
+  .art-title-line h1{font-size:1.5rem}
+  #welcome h1{font-size:1.6rem}
+  #search-wrap{display:none}
+}
+@media(max-width:420px){
+  .card-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <button id="menu-btn" aria-label="Toggle navigation" onclick="toggleMenu()">&#9776;</button>
+  <a class="site-logo" href="#" onclick="showWelcome();return false;">
+    <span class="name">AI Learning Diary</span>
+    <span class="tagline">personal knowledge base</span>
+  </a>
+  <div id="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+    <input id="search-input" type="search" placeholder="Search entries…" oninput="filterPosts(this.value)" aria-label="Search entries"/>
+  </div>
+</div>
+
+<div id="layout">
+  <nav id="sidebar" aria-label="Site navigation">
+    <div class="sb-sec">
+      <h3>Navigation</h3>
+      <ul>
+        <li><button onclick="showWelcome();closeMobile()">&#127968; Main page</button></li>
+      </ul>
+    </div>
+    <div class="sb-sec">
+      <h3>All entries</h3>
+      <ul id="post-list">
+        <li style="padding:.5rem .9rem;font-family:var(--sans);font-size:.78rem;color:var(--muted)">Loading…</li>
+      </ul>
+    </div>
+    <div class="sb-sec">
+      <h3>Topics</h3>
+      <ul id="tag-list"></ul>
+    </div>
+  </nav>
+
+  <main id="content">
+
+    <div id="welcome">
+      <h1>AI Learning Diary</h1>
+      <p class="intro">
+        A personal knowledge base documenting explorations into artificial intelligence —
+        security, agentic systems, tooling, and everything in between.
+        Entries are written as they are learned.
+      </p>
+      <hr style="border:none;border-top:1px solid var(--border-light);margin:.9rem 0"/>
+      <p style="font-family:var(--sans);font-size:.83rem;margin-bottom:.65rem">
+        Browse all entries:
+      </p>
+      <div class="card-grid" id="entry-cards"></div>
+    </div>
+
+    <article id="article" aria-live="polite">
+      <div class="art-title-line"><h1 id="art-title"></h1></div>
+      <p class="art-tagline" id="art-tagline"></p>
+      <div class="art-metabar" id="art-meta"></div>
+      <div class="art-grid">
+        <div id="art-body"></div>
+        <aside>
+          <div class="toc-box" id="toc-box">
+            <div class="toc-head">
+              Contents
+              <button onclick="toggleToc()" id="toc-toggle">hide</button>
+            </div>
+            <ol id="toc-list"></ol>
+          </div>
+        </aside>
+      </div>
+    </article>
+
+  </main>
+</div>
+
+<footer>
+  AI Learning Diary &nbsp;·&nbsp;
+  Content personal use only &nbsp;·&nbsp;
+  <a href="posts/index.json">Posts index (JSON)</a>
+</footer>
+
+<script>
+var tocOpen = true;
+
+function toggleMenu(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+function closeMobile(){
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function toggleToc(){
+  var ol = document.getElementById('toc-list');
+  tocOpen = !tocOpen;
+  ol.style.display = tocOpen ? '' : 'none';
+  document.getElementById('toc-toggle').textContent = tocOpen ? 'hide' : 'show';
+}
+
+function showWelcome(){
+  document.getElementById('welcome').style.display = 'block';
+  document.getElementById('article').style.display = 'none';
+  document.querySelectorAll('#post-list button').forEach(function(b){ b.classList.remove('active'); });
+  document.title = 'AI Learning Diary';
+  window.scrollTo(0,0);
+}
+
+function filterPosts(q){
+  document.querySelectorAll('#post-list li').forEach(function(li){
+    var btn = li.querySelector('button');
+    if(!btn) return;
+    li.style.display = btn.textContent.toLowerCase().indexOf(q.toLowerCase()) > -1 ? '' : 'none';
+  });
+}
+
+function parseFrontmatter(raw){
+  var m = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  if(!m) return { meta:{}, body:raw };
+  var fm = {};
+  m[1].split('\n').forEach(function(l){
+    var i = l.indexOf(':');
+    if(i < 0) return;
+    fm[l.slice(0,i).trim()] = l.slice(i+1).trim().replace(/^"|"$/g,'');
+  });
+  return { meta:fm, body:m[2] };
+}
+
+function tagColor(tag){
+  var map = {security:'#006699', diary:'#336600', research:'#660066', tools:'#884400'};
+  return map[(tag||'').toLowerCase()] || '#555';
+}
+
+function buildToc(bodyEl){
+  var hs = bodyEl.querySelectorAll('h2, h3');
+  var ol = document.getElementById('toc-list');
+  ol.innerHTML = '';
+  var box = document.getElementById('toc-box');
+  if(hs.length === 0){ box.style.display = 'none'; return; }
+  box.style.display = '';
+  var n = 0;
+  hs.forEach(function(h){
+    n++;
+    var id = 'sec-' + n;
+    h.id = id;
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.href = '#' + id;
+    a.textContent = h.textContent;
+    li.appendChild(a);
+    if(h.tagName === 'H3'){
+      var sub = ol.querySelector('ol:last-child');
+      if(!sub){ sub = document.createElement('ol'); ol.appendChild(sub); }
+      sub.appendChild(li);
+    } else {
+      ol.appendChild(li);
+    }
+  });
+}
+
+async function openPost(post){
+  document.getElementById('welcome').style.display = 'none';
+  document.getElementById('article').style.display = 'block';
+  document.getElementById('art-body').innerHTML =
+    '<p style="font-family:var(--sans);color:var(--muted);font-size:.84rem">Loading…</p>';
+  document.getElementById('toc-list').innerHTML = '';
+
+  var res = await fetch('posts/' + post.file);
+  var raw = await res.text();
+  var p = parseFrontmatter(raw);
+  var meta = p.meta;
+
+  var title = meta.title || post.title;
+  document.getElementById('art-title').textContent = title;
+  document.getElementById('art-tagline').textContent = meta.topic || '';
+  document.title = title + ' – AI Learning Diary';
+
+  var tag = meta.tag || post.tag || 'diary';
+  var c = tagColor(tag);
+  document.getElementById('art-meta').innerHTML =
+    '<span>' + (post.date||meta.date||'') + '</span>' +
+    '<span class="tag-pill" style="border-color:'+c+';color:'+c+'">' + tag + '</span>' +
+    (meta.topic ? '<span style="font-style:italic">' + meta.topic + '</span>' : '');
+
+  document.getElementById('art-body').innerHTML = marked.parse(p.body);
+  buildToc(document.getElementById('art-body'));
+
+  document.querySelectorAll('#post-list button').forEach(function(b){
+    b.classList.toggle('active', b.dataset.file === post.file);
+  });
+
+  closeMobile();
+  window.scrollTo(0,0);
+}
+
+async function init(){
+  var posts;
+  try {
+    posts = await (await fetch('posts/index.json')).json();
+  } catch(e) {
+    document.getElementById('post-list').innerHTML =
+      '<li style="padding:.5rem .9rem;font-family:var(--sans);font-size:.78rem;color:red">Error: posts/index.json not found</li>';
+    return;
+  }
+
+  var list = document.getElementById('post-list');
+  list.innerHTML = '';
+  var tags = {};
+
+  posts.forEach(function(post){
+    var li = document.createElement('li');
+    var btn = document.createElement('button');
+    btn.dataset.file = post.file;
+    btn.innerHTML = post.title + '<span class="post-date">' + post.date + '</span>';
+    btn.onclick = function(){ openPost(post); };
+    li.appendChild(btn);
+    list.appendChild(li);
+
+    var t = (post.tag || 'diary').toLowerCase();
+    tags[t] = (tags[t] || 0) + 1;
+  });
+
+  var tagList = document.getElementById('tag-list');
+  tagList.innerHTML = '';
+  Object.keys(tags).forEach(function(t){
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.href = '#';
+    a.textContent = t.charAt(0).toUpperCase() + t.slice(1) + ' (' + tags[t] + ')';
+    a.onclick = function(e){ e.preventDefault(); filterPosts(t); };
+    li.appendChild(a);
+    tagList.appendChild(li);
+  });
+
+  var cards = document.getElementById('entry-cards');
+  cards.innerHTML = '';
+  posts.forEach(function(post){
+    var div = document.createElement('div');
+    div.className = 'entry-card';
+    div.innerHTML =
+      '<h3>' + post.title + '</h3>' +
+      '<div class="cmeta">' + post.date + '</div>' +
+      '<span class="card-tag">' + (post.tag||'diary') + '</span>';
+    div.onclick = function(){ openPost(post); };
+    cards.appendChild(div);
+  });
+
+  if(posts.length > 0) openPost(posts[0]);
+}
+
+init();
+</script>
+</body>
+</html>
