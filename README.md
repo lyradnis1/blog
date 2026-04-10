@@ -1,2 +1,0 @@
-# blog
-Daryl's blog
